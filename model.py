@@ -32,7 +32,7 @@ class Model():
         pass
 
     def getWavLength(self):
-        return 5 
+        return "5" 
 
     def getFileName(self):
         print(self.filename)

@@ -29,11 +29,12 @@ class MainView(ttk.Frame):
         self.panel.pack(side=tk.LEFT)
         
         #ensure the right file name is being used for the label
+        self.fileName = self.filePath.split("/")[-1]
         self.fileLabel.config(text=self.fileName, justify=tk.RIGHT)
-        self.fileLengthLabel.config(text=self.controller.getWavLength(), justify=tk.RIGHT)
+        self.fileLengthLabel.config(text=self.controller.getWavLength() + " sec", justify=tk.RIGHT)
 
         self.fileLabel.pack(side=tk.TOP)
-        self.fileLengthLabel.pack(side=tk.RIGHT, expand=True, fill=tk.Y)
+        self.fileLengthLabel.pack(side=tk.RIGHT, expand=True, fill=tk.BOTH)
 
         self.fileText.grid(row=1, column=0, sticky=tk.W, pady=20)
 
@@ -42,7 +43,7 @@ class MainView(ttk.Frame):
         super().__init__(parent)
 
         self.controller: Controller()
-        self.fileName = ""
+        self.filePath = ""
 
         #set size of root window and prevent resizing
         parent.resizable(False, False)
@@ -66,8 +67,8 @@ class MainView(ttk.Frame):
         self.fileIcon = ImageTk.PhotoImage(Image.open('wavicon.png').resize((60,60)))
         self.panel = tk.Label(self.fileText, image=self.fileIcon)
 
-        self.fileLabel = ttk.Label(self.fileText, font=helveticaText)
-        self.fileLengthLabel = ttk.Label(self.fileText, font=helveticaText)
+        self.fileLabel = ttk.Label(self.fileText, font=helveticaLabel)
+        self.fileLengthLabel = ttk.Label(self.fileText, font=helveticaLabel)
         
 class Controller():
 
@@ -79,7 +80,7 @@ class Controller():
         self.model.openFile()
 
         #grab file name before indicating it has been uploaded
-        self.view.fileName = self.model.getFileName()
+        self.view.filePath = self.model.getFileName()
         self.view.fileUploaded()
 
     def getWavLength(self):
