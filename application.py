@@ -3,6 +3,8 @@ from tkinter import font as tkFont
 import tkinter as tk
 from PIL import ImageTk, Image
 from model import Model
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
 
 
 # Create view, and controller objects in order to organize funcionality in the application.
@@ -23,10 +25,14 @@ class MainView(ttk.Frame):
     def setController(self, controller):
         self.controller = controller
 
+    def plotWave(self, fig):
+        self.canvas = FigureCanvasTkAgg(fig, master=self.plotWindow)
+        self.canvas.get_tk_widget().pack()
+        self.plotWindow.grid(column=2, row=1)
     
     #code to run once a file has been uploaded
     def fileUploaded(self):
-        self.panel.pack(side=tk.LEFT)
+        self.panel.pack(side=tk.LEFT, padx=(0, 20))
         
         #ensure the right file name is being used for the label
         self.fileName = self.filePath.split("/")[-1]
@@ -38,7 +44,7 @@ class MainView(ttk.Frame):
 
         self.fileText.grid(row=1, column=0, sticky=tk.W, pady=20)
 
-    
+        self.controller.plotWave()
     def __init__(self, parent: tk.Tk):
         super().__init__(parent)
 
@@ -52,6 +58,8 @@ class MainView(ttk.Frame):
 
         self.fileText = tk.Frame(parent)
         self.uploadText = tk.Frame(parent)
+
+        self.plotWindow = tk.Frame(parent)
 
         #Upload File label and button
         self.uploadLabel = ttk.Label(self.uploadText, text="Upload Data", font=helveticaLabel)
@@ -85,6 +93,11 @@ class Controller():
 
     def getWavLength(self):
         return self.model.getWavLength()
+    
+    def plotWave(self):
+        self.model.plotWave()
+
+        self.view.plotWave(self.model.fig)
 
 view = MainView(root)
 model = Model()
