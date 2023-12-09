@@ -44,10 +44,10 @@ class Model():
         pass
 
     def getWavLength(self):
-        return "5" 
+        return str(round(sox.file_info.duration("output.wav"), 2))
     
     def plotWave(self):
-        self.fig = Figure(figsize=(2,2))
+        self.fig = Figure(figsize=(4,2))
         a = self.fig.add_subplot(111)
         a.plot(self.sig)
 

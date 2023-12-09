@@ -26,9 +26,10 @@ class MainView(ttk.Frame):
         self.controller = controller
 
     def plotWave(self, fig):
+        #generate canvas to use as widget in tk
         self.canvas = FigureCanvasTkAgg(fig, master=self.plotWindow)
-        self.canvas.get_tk_widget().pack()
-        self.plotWindow.grid(column=2, row=1)
+        self.canvas.get_tk_widget().pack(padx=20)
+        self.plotWindow.grid(column=1, row=1, sticky='n')
     
     #code to run once a file has been uploaded
     def fileUploaded(self):
@@ -42,9 +43,27 @@ class MainView(ttk.Frame):
         self.fileLabel.pack(side=tk.TOP)
         self.fileLengthLabel.pack(side=tk.RIGHT, expand=True, fill=tk.BOTH)
 
-        self.fileText.grid(row=1, column=0, sticky=tk.W, pady=20)
+        self.fileText.grid(row=1, column=0, sticky="nw", pady=(20,20))
 
+        #trigger wave plotting function in order to plot the waveform of thie audio file
         self.controller.plotWave()
+
+
+        #resonance data text
+        # TODO - need to fix justification of the label
+        self.highestResonanceLabel.config(text="Highest Resonance")
+        self.rt60Label.config(text="Low, Med, High")
+        
+        self.highestResonanceValue.config(text="500 hz")
+        self.rt60Value.config(text="10 hz, 50 hz, 200 hz")
+
+        self.highestResonanceLabel.grid(row=3, column=0, sticky='nw')
+        self.rt60Label.grid(row=3, column=1, sticky='n')
+
+        self.highestResonanceValue.grid(row=4, column=0, sticky='n')
+        self.rt60Value.grid(row=4, column=1, sticky='n')
+
+
     def __init__(self, parent: tk.Tk):
         super().__init__(parent)
 
@@ -53,11 +72,12 @@ class MainView(ttk.Frame):
 
         #set size of root window and prevent resizing
         parent.resizable(False, False)
-        parent.geometry('700x400')
+        parent.geometry('800x400')
         parent.config(padx=20, pady=20)
 
         self.fileText = tk.Frame(parent)
         self.uploadText = tk.Frame(parent)
+        self.resonanceText = tk.Frame(parent)
 
         self.plotWindow = tk.Frame(parent)
 
@@ -77,6 +97,12 @@ class MainView(ttk.Frame):
 
         self.fileLabel = ttk.Label(self.fileText, font=helveticaLabel)
         self.fileLengthLabel = ttk.Label(self.fileText, font=helveticaLabel)
+
+        self.highestResonanceLabel = ttk.Label(parent, font=helveticaLabel)
+        self.highestResonanceValue = ttk.Label(parent, font=helveticaLabel)
+
+        self.rt60Label = ttk.Label(parent, font=helveticaLabel)
+        self.rt60Value = ttk.Label(parent, font=helveticaLabel)
         
 class Controller():
 
@@ -95,8 +121,10 @@ class Controller():
         return self.model.getWavLength()
     
     def plotWave(self):
+        #calculate waveform using the model plot wave function
         self.model.plotWave()
 
+        #grab the figure calculated in the model function and pass it through to the view in order to plot
         self.view.plotWave(self.model.fig)
 
 view = MainView(root)
