@@ -18,7 +18,7 @@ helveticaText = tkFont.Font(family='Helvetica', size=16)
 helveticaButton = tkFont.Font(family='Helvetica', size=12, weight='bold')
 
 class MainView(ttk.Frame):
-
+    
     def uploadButtonClicked(self):
         self.controller.upload()
 
@@ -50,19 +50,17 @@ class MainView(ttk.Frame):
 
 
         #resonance data text
-        # TODO - need to fix justification of the label
         self.highestResonanceLabel.config(text="Highest Resonance")
         self.rt60Label.config(text="Low, Med, High")
         
         self.highestResonanceValue.config(text="500 hz")
         self.rt60Value.config(text="10 hz, 50 hz, 200 hz")
 
-        self.highestResonanceLabel.grid(row=3, column=0, sticky='nw')
-        self.rt60Label.grid(row=3, column=1, sticky='n')
+        self.highestResonanceLabel.grid(row=3, column=0, sticky='n', pady=20)
+        self.rt60Label.grid(row=3, column=1, sticky='n', pady=20)
 
         self.highestResonanceValue.grid(row=4, column=0, sticky='n')
         self.rt60Value.grid(row=4, column=1, sticky='n')
-
 
     def __init__(self, parent: tk.Tk):
         super().__init__(parent)
@@ -103,7 +101,7 @@ class MainView(ttk.Frame):
 
         self.rt60Label = ttk.Label(parent, font=helveticaLabel)
         self.rt60Value = ttk.Label(parent, font=helveticaLabel)
-        
+
 class Controller():
 
     def __init__(self, model: Model, view: MainView):
