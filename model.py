@@ -178,6 +178,9 @@ class Model():
         data_dict["bottom_RT20_time"] = self.times[bottom_RT20_index]
         data_dict["RT20"] = rt20
         data_dict["RT60"] = rt60
+        data_dict["max_amplitude_index"] = max_amplitude_index
+        data_dict["top_RT20_index"] = top_RT20_index
+        data_dict["bottom_RT20_index"] = bottom_RT20_index
 
 
         # plt.plot(self.times, amplitudes)
@@ -192,7 +195,7 @@ class Model():
         MID_TARGET_FREQ = 1600
         HIGH_TARGET_FREQ = 5000
 
-        self.frequency_data = [{"target_freq": 0, "actual_freq": 0, "amplitudes": [], "max_amplitude": 0, "top_RT20_amplitude": 0, "bottom_RT20_amplitude": 0, "top_RT20_time": 0, "bottom_RT20_time": 0, "RT20": 0, "RT60": 0} for f in range(0, 3)]
+        self.frequency_data = [{"target_freq": 0, "actual_freq": 0, "amplitudes": [], "max_amplitude": 0, "top_RT20_amplitude": 0, "bottom_RT20_amplitude": 0, "top_RT20_time": 0, "bottom_RT20_time": 0, "RT20": 0, "RT60": 0, "max_amplitude_index": 0, "top_RT20_index": 0, "bottom_RT20_index": 0} for f in range(0, 3)]
 
         self.frequency_data[0]["target_freq"] = LOW_TARGET_FREQ
         self.frequency_data[1]["target_freq"] = MID_TARGET_FREQ

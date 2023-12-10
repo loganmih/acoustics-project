@@ -5,10 +5,14 @@ from PIL import ImageTk, Image
 from model import Model
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
+import matplotlib.pyplot as plt
 
 # Create view, and controller objects in order to organize funcionality in the application.
 # Creating the  view, and controller objects here will reduce clutter in the project.
 # The other py modules will contain code to handle the audio processing.
+
+
+#create new window to show four plots, as well as a button to combine the plots
 
 root = tk.Tk()
 
@@ -21,6 +25,9 @@ class MainView(ttk.Frame):
     def uploadButtonClicked(self):
         self.controller.upload()
 
+    def showAmplitude(self):
+        self.controller.showAmplitude() 
+
     def setController(self, controller):
         self.controller = controller
 
@@ -29,12 +36,46 @@ class MainView(ttk.Frame):
     
     def getrt60s(self):
         return self.controller.getrt60s()
+    
+    def getDifference(self):
+        return self.controller.getDifference()
+    
+    def plotrt60s(self):
+        self.controller.plotrt60s()
+
+        self.lowCanvas = FigureCanvasTkAgg(self.controller.lowPlot, master=self.newWindow)
+        self.lowCanvas.get_tk_widget().grid(column=1, row=1, padx=20, pady=20)
+
+        self.medCanvas = FigureCanvasTkAgg(self.controller.medPlot, master=self.newWindow)
+        self.medCanvas.get_tk_widget().grid(column=2, row=1, padx=20, pady=20)
+        
+        self.highCanvas = FigureCanvasTkAgg(self.controller.highPlot, master=self.newWindow)
+        self.highCanvas.get_tk_widget().grid(column=1, row=2, padx=20, pady=20)
+
+        self.combinedCanvas = FigureCanvasTkAgg(self.controller.combinedPlot, master=self.newWindow)
+
+    def combinePlot(self):
+        self.combinedCanvas.get_tk_widget().grid(column=2, row=2, padx=20, pady=20)
 
     def plotWave(self, fig):
         #generate canvas to use as widget in tk
         self.canvas = FigureCanvasTkAgg(fig, master=self.plotWindow)
         self.canvas.get_tk_widget().pack(padx=20)
         self.plotWindow.grid(column=1, row=1, sticky='n')
+
+    def newRT60Window(self):
+        self.newWindow = tk.Toplevel()
+
+        self.newWindow.resizable(False, False)
+        self.newWindow.config(width=700, height=400)
+
+        self.plotrt60s()
+
+        self.newRTText = ttk.Label(self.newWindow, text="Difference for 0.5: " + self.getDifference(), font=helveticaLabel)
+        self.newRTText.grid(column=1, row=0)
+
+        self.combineButton = tk.Button(self.newWindow, text="Combine Plots", command=self.combinePlot, font=helveticaButton)
+        self.combineButton.grid(column=0, row=0, padx=20, pady=20, sticky='nw')
     
     #code to run once a file has been uploaded
     def fileUploaded(self):
@@ -54,6 +95,7 @@ class MainView(ttk.Frame):
         self.controller.plotWave()
 
         #plot button
+        self.amplitudeButton.grid(row=1, column=0, pady=20)
         self.plotButton.grid(row=1, column=0, sticky='s', pady=20)
 
 
@@ -105,7 +147,8 @@ class MainView(ttk.Frame):
         self.fileLengthLabel = ttk.Label(self.fileText, font=helveticaLabel)
 
         #button to show plots of rt60
-        self.plotButton = tk.Button(parent, text="Plot RT60", font=helveticaButton)
+        self.amplitudeButton = tk.Button(parent, text="Plot Amplitude", font=helveticaButton, command=self.showAmplitude)
+        self.plotButton = tk.Button(parent, text="Plot RT60", font=helveticaButton, command=self.newRT60Window)
 
         #data about the audio file
         self.highestResonanceLabel = ttk.Label(parent, font=helveticaLabel)
@@ -129,12 +172,51 @@ class Controller():
         self.view.filePath = self.model.filein.split("/")[-1]
         self.view.fileUploaded()
 
+    def showAmplitude(self):
+        plt.plot(self.model.freqs, self.model.avg_amplidtude_per_freq)
+        plt.xlim(0, 3000)
+
+        plt.show()
+
     def getResonantFreq(self):
         return self.model.resonant_freq
     
     def getrt60s(self):
         return [round(x["RT60"], 3) for x in self.model.frequency_data]
-        
+
+    def getDifference(self):
+        return str(round(self.model.difference, 3))
+    
+    def plotrt60s(self):
+        self.lowPlot = Figure(figsize=(3, 3))
+        self.medPlot = Figure(figsize=(3, 3))
+        self.highPlot = Figure(figsize=(3, 3))
+
+        self.combinedPlot = Figure(figsize=(3, 3))
+
+        a = self.lowPlot.add_subplot(111)
+        b = self.medPlot.add_subplot(111)
+        c = self.highPlot.add_subplot(111)
+
+        lowSubPlot = self.combinedPlot.add_subplot(111)
+
+        self.RT60plots = [a, b, c]
+
+        a.set_title("Low RT60")
+        b.set_title("Med RT60")
+        c.set_title("High RT60")
+        lowSubPlot.set_title("Combined Plot")
+
+        for i, x in enumerate(self.model.frequency_data):
+            self.RT60plots[i].plot(self.model.times, x["amplitudes"])
+            self.RT60plots[i].plot(self.model.times[x["max_amplitude_index"]], x["max_amplitude"], "go")
+            self.RT60plots[i].plot(self.model.times[x["top_RT20_index"]], x["top_RT20_amplitude"], "yo")
+            self.RT60plots[i].plot(self.model.times[x["bottom_RT20_index"]], x["bottom_RT20_amplitude"], "ro")
+
+        lowSubPlot.plot(self.model.times, self.model.frequency_data[0]["amplitudes"])
+        lowSubPlot.plot(self.model.times, self.model.frequency_data[1]["amplitudes"])
+        lowSubPlot.plot(self.model.times, self.model.frequency_data[2]["amplitudes"])
+
     def getWavLength(self):
         return str(self.model.audio_duration)
     
