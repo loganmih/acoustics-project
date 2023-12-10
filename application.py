@@ -117,7 +117,7 @@ class MainView(ttk.Frame):
 
         #set size of root window and prevent resizing
         parent.resizable(False, False)
-        parent.geometry('700x400')
+        parent.geometry('700x450')
         parent.config(padx=20, pady=20)
 
         self.fileText = tk.Frame(parent)
