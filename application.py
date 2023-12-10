@@ -48,15 +48,18 @@ class MainView(ttk.Frame):
         self.fileLabel.pack(side=tk.TOP)
         self.fileLengthLabel.pack(side=tk.RIGHT, expand=True, fill=tk.BOTH)
 
-        self.fileText.grid(row=1, column=0, sticky="nw", pady=(20,20))
+        self.fileText.grid(row=1, column=0, sticky="nw", pady=20)
 
         #trigger wave plotting function in order to plot the waveform of thie audio file
         self.controller.plotWave()
 
+        #plot button
+        self.plotButton.grid(row=1, column=0, sticky='s', pady=20)
+
 
         #resonance data text
         self.highestResonanceLabel.config(text="Highest Resonance")
-        self.rt60Label.config(text="Low, Med, High rt60")
+        self.rt60Label.config(text="Low, Med, High RT60")
         
         self.highestResonanceValue.config(text=str(self.getResonantFreq()) + " hz")
         self.rt60Value.config(text=str(self.getrt60s()))
@@ -96,11 +99,15 @@ class MainView(ttk.Frame):
         #highest resonance, low, medium, and high frequency RT60, etc
         #once file is uploaded, these widgets will show
         self.fileIcon = ImageTk.PhotoImage(Image.open('wavicon.png').resize((60,60)))
-        self.panel = tk.Label(self.fileText, image=self.fileIcon)
+        self.panel = ttk.Label(self.fileText, image=self.fileIcon)
 
         self.fileLabel = ttk.Label(self.fileText, font=helveticaLabel)
         self.fileLengthLabel = ttk.Label(self.fileText, font=helveticaLabel)
 
+        #button to show plots of rt60
+        self.plotButton = tk.Button(parent, text="Plot RT60", font=helveticaButton)
+
+        #data about the audio file
         self.highestResonanceLabel = ttk.Label(parent, font=helveticaLabel)
         self.highestResonanceValue = ttk.Label(parent, font=helveticaLabel)
 
@@ -126,7 +133,7 @@ class Controller():
         return self.model.resonant_freq
     
     def getrt60s(self):
-        return [x["RT60"] for x in self.model.frequency_data]
+        return [round(x["RT60"], 3) for x in self.model.frequency_data]
         
     def getWavLength(self):
         return str(self.model.audio_duration)
