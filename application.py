@@ -4,8 +4,7 @@ import tkinter as tk
 from PIL import ImageTk, Image
 from model import Model
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-
-
+from matplotlib.figure import Figure
 
 # Create view, and controller objects in order to organize funcionality in the application.
 # Creating the  view, and controller objects here will reduce clutter in the project.
@@ -24,6 +23,12 @@ class MainView(ttk.Frame):
 
     def setController(self, controller):
         self.controller = controller
+
+    def getResonantFreq(self):
+        return self.controller.getResonantFreq()
+    
+    def getrt60s(self):
+        return self.controller.getrt60s()
 
     def plotWave(self, fig):
         #generate canvas to use as widget in tk
@@ -51,10 +56,10 @@ class MainView(ttk.Frame):
 
         #resonance data text
         self.highestResonanceLabel.config(text="Highest Resonance")
-        self.rt60Label.config(text="Low, Med, High")
+        self.rt60Label.config(text="Low, Med, High rt60")
         
-        self.highestResonanceValue.config(text="500 hz")
-        self.rt60Value.config(text="10 hz, 50 hz, 200 hz")
+        self.highestResonanceValue.config(text=str(self.getResonantFreq()) + " hz")
+        self.rt60Value.config(text=str(self.getrt60s()))
 
         self.highestResonanceLabel.grid(row=3, column=0, sticky='n', pady=20)
         self.rt60Label.grid(row=3, column=1, sticky='n', pady=20)
@@ -70,7 +75,7 @@ class MainView(ttk.Frame):
 
         #set size of root window and prevent resizing
         parent.resizable(False, False)
-        parent.geometry('800x400')
+        parent.geometry('700x400')
         parent.config(padx=20, pady=20)
 
         self.fileText = tk.Frame(parent)
@@ -109,21 +114,34 @@ class Controller():
         self.view = view
 
     def upload(self):
-        self.model.openFile()
+        self.model.setup_audio_file()
+        self.model.process_audio_file()
+        self.model.find_frequency_RT60s()
 
         #grab file name before indicating it has been uploaded
-        self.view.filePath = self.model.getFileName()
+        self.view.filePath = self.model.filein.split("/")[-1]
         self.view.fileUploaded()
 
+    def getResonantFreq(self):
+        return self.model.resonant_freq
+    
+    def getrt60s(self):
+        return [x["RT60"] for x in self.model.frequency_data]
+        
     def getWavLength(self):
-        return self.model.getWavLength()
+        return str(self.model.audio_duration)
     
     def plotWave(self):
         #calculate waveform using the model plot wave function
-        self.model.plotWave()
+        self.model.plot_wave()
+        #self.model.process_audio_file()
 
         #grab the figure calculated in the model function and pass it through to the view in order to plot
-        self.view.plotWave(self.model.fig)
+        self.fig = Figure(figsize=(4,2))
+        a = self.fig.add_subplot(111)
+        a.plot(self.model.sig)
+
+        self.view.plotWave(self.fig)
 
 view = MainView(root)
 model = Model()

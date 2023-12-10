@@ -5,18 +5,38 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.io import wavfile
 from scipy import signal
+from tkinter import filedialog as fd
 
 class Model():
     
     # Getting file
     # Just hard coding this for now, once the user selects a file, update 
 
+    def get_audio_file(self):
+        filetypes = (
+            ('Audio files', '*.wav *.ogg *.mp3'),
+            ('All files', '*.*')
+        )
+
+        self.filein = fd.askopenfilename(
+            title='Open a file',
+            initialdir='/',
+            filetypes=filetypes
+        )
+
     def setup_audio_file(self, file_path = "clap3.mp3"):
+        
+        #grab file path through select dialog
+        self.get_audio_file()
+
+        #set file path if one is given
+        #if not, it will remain defualt
+        if file_path:
+            file_path = self.filein
         
         file_type = file_path[-3:]
 
         print("File path:", file_path)
-
 
         if file_type == "wav":
             print("File already in wav format")
