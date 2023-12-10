@@ -2,10 +2,8 @@ from tkinter import ttk
 from tkinter import font as tkFont
 import tkinter as tk
 from PIL import ImageTk, Image
-from model import Model
+from controller import Controller
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from matplotlib.figure import Figure
-import matplotlib.pyplot as plt
 
 # Create view, and controller objects in order to organize funcionality in the application.
 # Creating the  view, and controller objects here will reduce clutter in the project.
@@ -14,11 +12,6 @@ import matplotlib.pyplot as plt
 
 #create new window to show four plots, as well as a button to combine the plots
 
-root = tk.Tk()
-
-helveticaLabel = tkFont.Font(family='Helvetica', size=18, weight='bold')
-helveticaText = tkFont.Font(family='Helvetica', size=16)
-helveticaButton = tkFont.Font(family='Helvetica', size=12, weight='bold')
 
 class MainView(ttk.Frame):
     
@@ -71,10 +64,10 @@ class MainView(ttk.Frame):
 
         self.plotrt60s()
 
-        self.newRTText = ttk.Label(self.newWindow, text="Difference for 0.5: " + self.getDifference(), font=helveticaLabel)
+        self.newRTText = ttk.Label(self.newWindow, text="Difference for 0.5: " + self.getDifference(), font=self.helveticaLabel)
         self.newRTText.grid(column=1, row=0)
 
-        self.combineButton = tk.Button(self.newWindow, text="Combine Plots", command=self.combinePlot, font=helveticaButton)
+        self.combineButton = tk.Button(self.newWindow, text="Combine Plots", command=self.combinePlot, font=self.helveticaButton)
         self.combineButton.grid(column=0, row=0, padx=20, pady=20, sticky='nw')
     
     #code to run once a file has been uploaded
@@ -115,6 +108,10 @@ class MainView(ttk.Frame):
     def __init__(self, parent: tk.Tk):
         super().__init__(parent)
 
+
+        self.helveticaLabel = tkFont.Font(family='Helvetica', size=18, weight='bold')
+        self.helveticaButton = tkFont.Font(family='Helvetica', size=12, weight='bold')
+
         self.controller: Controller()
         self.filePath = ""
 
@@ -130,9 +127,9 @@ class MainView(ttk.Frame):
         self.plotWindow = tk.Frame(parent)
 
         #Upload File label and button
-        self.uploadLabel = ttk.Label(self.uploadText, text="Upload Data", font=helveticaLabel)
+        self.uploadLabel = ttk.Label(self.uploadText, text="Upload Data", font=self.helveticaLabel)
         self.uploadLabel.pack(side=tk.LEFT, fill=tk.X)
-        self.uploadButton = tk.Button(self.uploadText, text="Select File", font=helveticaButton, command=self.uploadButtonClicked)
+        self.uploadButton = tk.Button(self.uploadText, text="Select File", font=self.helveticaButton, command=self.uploadButtonClicked)
         self.uploadButton.pack(side=tk.RIGHT, fill=tk.X)
 
         self.uploadText.grid(row=0, column=0, sticky="w")
@@ -143,99 +140,19 @@ class MainView(ttk.Frame):
         self.fileIcon = ImageTk.PhotoImage(Image.open('wavicon.png').resize((60,60)))
         self.panel = ttk.Label(self.fileText, image=self.fileIcon)
 
-        self.fileLabel = ttk.Label(self.fileText, font=helveticaLabel)
-        self.fileLengthLabel = ttk.Label(self.fileText, font=helveticaLabel)
+        self.fileLabel = ttk.Label(self.fileText, font=self.helveticaLabel)
+        self.fileLengthLabel = ttk.Label(self.fileText, font=self.helveticaLabel)
 
         #button to show plots of rt60
-        self.amplitudeButton = tk.Button(parent, text="Plot Amplitude", font=helveticaButton, command=self.showAmplitude)
-        self.plotButton = tk.Button(parent, text="Plot RT60", font=helveticaButton, command=self.newRT60Window)
+        self.amplitudeButton = tk.Button(parent, text="Plot Amplitude", font=self.helveticaButton, command=self.showAmplitude)
+        self.plotButton = tk.Button(parent, text="Plot RT60", font=self.helveticaButton, command=self.newRT60Window)
 
         #data about the audio file
-        self.highestResonanceLabel = ttk.Label(parent, font=helveticaLabel)
-        self.highestResonanceValue = ttk.Label(parent, font=helveticaLabel)
+        self.highestResonanceLabel = ttk.Label(parent, font=self.helveticaLabel)
+        self.highestResonanceValue = ttk.Label(parent, font=self.helveticaLabel)
 
-        self.rt60Label = ttk.Label(parent, font=helveticaLabel)
-        self.rt60Value = ttk.Label(parent, font=helveticaLabel)
+        self.rt60Label = ttk.Label(parent, font=self.helveticaLabel)
+        self.rt60Value = ttk.Label(parent, font=self.helveticaLabel)
 
-class Controller():
 
-    def __init__(self, model: Model, view: MainView):
-        self.model = model 
-        self.view = view
 
-    def upload(self):
-        self.model.setup_audio_file()
-        self.model.process_audio_file()
-        self.model.find_frequency_RT60s()
-
-        #grab file name before indicating it has been uploaded
-        self.view.filePath = self.model.filein.split("/")[-1]
-        self.view.fileUploaded()
-
-    def showAmplitude(self):
-        plt.plot(self.model.freqs, self.model.avg_amplidtude_per_freq)
-        plt.xlim(0, 3000)
-
-        plt.show()
-
-    def getResonantFreq(self):
-        return self.model.resonant_freq
-    
-    def getrt60s(self):
-        return [round(x["RT60"], 3) for x in self.model.frequency_data]
-
-    def getDifference(self):
-        return str(round(self.model.difference, 3))
-    
-    def plotrt60s(self):
-        self.lowPlot = Figure(figsize=(3, 3))
-        self.medPlot = Figure(figsize=(3, 3))
-        self.highPlot = Figure(figsize=(3, 3))
-
-        self.combinedPlot = Figure(figsize=(3, 3))
-
-        a = self.lowPlot.add_subplot(111)
-        b = self.medPlot.add_subplot(111)
-        c = self.highPlot.add_subplot(111)
-
-        lowSubPlot = self.combinedPlot.add_subplot(111)
-
-        self.RT60plots = [a, b, c]
-
-        a.set_title("Low RT60")
-        b.set_title("Med RT60")
-        c.set_title("High RT60")
-        lowSubPlot.set_title("Combined Plot")
-
-        for i, x in enumerate(self.model.frequency_data):
-            self.RT60plots[i].plot(self.model.times, x["amplitudes"])
-            self.RT60plots[i].plot(self.model.times[x["max_amplitude_index"]], x["max_amplitude"], "go")
-            self.RT60plots[i].plot(self.model.times[x["top_RT20_index"]], x["top_RT20_amplitude"], "yo")
-            self.RT60plots[i].plot(self.model.times[x["bottom_RT20_index"]], x["bottom_RT20_amplitude"], "ro")
-
-        lowSubPlot.plot(self.model.times, self.model.frequency_data[0]["amplitudes"])
-        lowSubPlot.plot(self.model.times, self.model.frequency_data[1]["amplitudes"])
-        lowSubPlot.plot(self.model.times, self.model.frequency_data[2]["amplitudes"])
-
-    def getWavLength(self):
-        return str(self.model.audio_duration)
-    
-    def plotWave(self):
-        #calculate waveform using the model plot wave function
-        self.model.plot_wave()
-        #self.model.process_audio_file()
-
-        #grab the figure calculated in the model function and pass it through to the view in order to plot
-        self.fig = Figure(figsize=(4,2))
-        a = self.fig.add_subplot(111)
-        a.plot(self.model.sig)
-
-        self.view.plotWave(self.fig)
-
-view = MainView(root)
-model = Model()
-controller = Controller(model, view)
-view.setController(controller)
-view.grid(row=0, column=0)
-
-view.mainloop()
