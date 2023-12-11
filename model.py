@@ -11,13 +11,10 @@ import math
 
 
 class Model():
-    
-    # Getting file
-    # Just hard coding this for now, once the user selects a file, update 
 
     def get_audio_file(self):
         filetypes = (
-            ('Audio files', '*.wav *.ogg *.mp3'),
+            ('Audio files', '*.wav *.mp3'),
             ('All files', '*.*')
         )
 
@@ -27,7 +24,7 @@ class Model():
             filetypes=filetypes
         )
 
-    def setup_audio_file(self, file_path = "clap3.mp3"):
+    def setup_audio_file(self, file_path = "clap.mp3"):
         
         self.file_path = file_path
 
@@ -43,27 +40,31 @@ class Model():
 
         print("File path:", self.file_path)
 
+        # Converting the file format if needed
         if file_type == "wav":
             print("File already in wav format")
 
             self.audio = AudioSegment.from_wav(self.file_path)
         elif file_type == "mp3":
-            print("File is in mp3 format, need to convert to wav")
+            print("File is in mp3 format, converting to wav")
             
             self.audio = AudioSegment.from_mp3(self.file_path)
         else:
-            print("ERROR: File format not accepted. Please try again with a different file")
+            print("ERROR: File format not accepted. Please try again with a different file.")
             exit()
 
+
+        # Converting from stereo to mono if needed
         print("Number of channels:", self.audio.channels)
 
         if self.audio.channels == 2:
             print("Converting from stereo to mono")
             self.audio = self.audio.set_channels(1)
         
-
+        # Exporting audio file
         self.audio.export("output.wav", format="wav")
         
+
         #convert to 16 bit in order for wave library to work
         sr, data = wavfile.read("output.wav")
         wavfile.write("output.wav", sr, np.int16(data))
@@ -71,9 +72,10 @@ class Model():
         # Duration of the audio in seconds
         self.audio_duration = len(self.audio) / 1000
 
-        print("Audio duration: ", self.audio_duration, "seconds")
+        print("Audio duration:", self.audio_duration, "seconds")
 
 
+    # Reads the audio data and uses the spectrogram to estimate the resonance
     def process_audio_file(self):
         sample_rate, data = wavfile.read("output.wav")
 
@@ -86,11 +88,6 @@ class Model():
         self.times = times
         self.image = image
 
-
-        # MAKE SURE TO ADD THIS
-        # plt.close()
-
-
         self.avg_amplidtude_per_freq = self.spectrum.mean(axis=1)
 
         self.max_freq_index = np.argmax(self.avg_amplidtude_per_freq)
@@ -99,14 +96,8 @@ class Model():
 
         print("Resonant frequency (highest resonance):", self.resonant_freq, "Hz")
 
-        # Graph of the average amplitude over the frequency, ******* USE THIS FOR THE LAST GRAPH **********
-        # plt.plot(self.freqs, self.avg_amplidtude_per_freq)
-        # plt.xlim(0, 3000)
 
-        # plt.show()
-
-
-
+    # Finds the closest frquency to the target frequency
     def find_closest_freq(self, target_freq):
         # Subtracting the target freq from all of the freqencies and taking the absolute value.
         # This leaves the displacement from the target value, so taking the minimum of those will give us the closest element
@@ -114,28 +105,31 @@ class Model():
 
         return self.freqs[closest_index], closest_index
 
+    # Finds the closest amplitude after the index offset
     def find_closest_amplitude(self, amplitudes, target_amplitude, index_offset = 0):
-        # closest_index = np.argmin(np.abs(amplitudes[index_offset:] - target_amplitude))
-
+        # Loop through all of the amplitudes after the offset
         for i in range(index_offset, len(amplitudes)):
+            # If we go past the target check this amplitude and the previous one
             if(amplitudes[i] < target_amplitude):
                 prev_index = i - 1
                 prev_amplitude = amplitudes[prev_index]
 
+                # Use this amplitude if its closer to the target than the previous amplitude, or if the preview amplitude index is before the offset 
                 if(abs(amplitudes[i] - target_amplitude) <= abs(prev_amplitude - target_amplitude) or prev_index < index_offset):
-                    return amplitudes[i], i 
-                
+                    return amplitudes[i], i
+                 
+                # Otherwise return the previous amplitude
                 return amplitudes[prev_index], prev_index 
 
+        print("ERROR: Could not find amplitude smaller than target amplitude:", target_amplitude, "after index offset:", index_offset, "Returning last amplitude")
         return amplitudes[-1], -1
 
-        # return amplitudes[closest_index + index_offset], closest_index + index_offset
 
-
-
+    # Finds the RT60 value for a target freqency, and stores relavant data in the given dictionary
     def find_RT60(self, target_freq, data_dict):
         print("Finding RT60 for target freqency", target_freq, "Hz")
         
+        # Finding the closest frequency to the target frequency
         freq, freq_index = self.find_closest_freq(target_freq)
 
         print("The closest frequency to", target_freq, "Hz found in the data set was", freq, "Hz, so that will be used instead.")
@@ -147,7 +141,7 @@ class Model():
         self.amplitudes = amplitudes
 
 
-
+        # Finding the max amplitude for this frequency
         max_amplitude_index = np.argmax(amplitudes)
 
         max_amplitude = amplitudes[max_amplitude_index]
@@ -155,13 +149,14 @@ class Model():
         print("The max amplitude for this frequency is", max_amplitude, "dB")
 
 
-        # The greater amplitude that we will be using in the RT20 calculation (max - 5dB), and its index in the amplitude array
+        # The larger amplitude that we will be using in the RT20 calculation (max - 5dB), and its index in the amplitude array
         top_RT20_amplitude, top_RT20_index = self.find_closest_amplitude(amplitudes, max_amplitude - 5, max_amplitude_index + 1)
 
+        # The smaller amplitude that we will be using in the RT20 calculation (max - 25dB), and its index in the amplitude array
         bottom_RT20_amplitude, bottom_RT20_index = self.find_closest_amplitude(amplitudes, max_amplitude - 25, top_RT20_index + 1)
 
 
-        # Calculating the RT60 time using the RT20
+        # Calculating the RT60 time using the RT20 time
         rt20 = self.times[bottom_RT20_index] - self.times[top_RT20_index]
 
         rt60 = rt20 * 3
@@ -172,6 +167,7 @@ class Model():
         
         print("Storing results in dictionary")
 
+        # Storing results
         data_dict["actual_freq"] = freq
         data_dict["amplitudes"] = amplitudes
         data_dict["max_amplitude"] = max_amplitude
@@ -186,20 +182,24 @@ class Model():
         data_dict["bottom_RT20_index"] = bottom_RT20_index
 
 
+    # Finds the RT60 time for the low, mid, and high target freqencies 
     def find_frequency_RT60s(self):
         LOW_TARGET_FREQ = 200
         MID_TARGET_FREQ = 1600
         HIGH_TARGET_FREQ = 5000
 
+        # Setting up dictionary list
         self.frequency_data = [{"target_freq": 0, "actual_freq": 0, "amplitudes": [], "max_amplitude": 0, "top_RT20_amplitude": 0, "bottom_RT20_amplitude": 0, "top_RT20_time": 0, "bottom_RT20_time": 0, "RT20": 0, "RT60": 0, "max_amplitude_index": 0, "top_RT20_index": 0, "bottom_RT20_index": 0} for f in range(0, 3)]
 
         self.frequency_data[0]["target_freq"] = LOW_TARGET_FREQ
         self.frequency_data[1]["target_freq"] = MID_TARGET_FREQ
         self.frequency_data[2]["target_freq"] = HIGH_TARGET_FREQ
 
+        # Finding the RT60 times
         for f in self.frequency_data:
             self.find_RT60(f["target_freq"], f)
 
+        # Finding the average RT60 time and the difference for .5 seconds
         self.avg_RT60 = sum(f["RT60"] for f in self.frequency_data) / len(self.frequency_data)
 
         print("The average RT60 is", self.avg_RT60, "seconds")
@@ -209,6 +209,7 @@ class Model():
         print("The difference is", self.difference, "seconds")
 
 
+    # Gets the amplitude values for the audio waveform
     def plot_wave(self):
         self.f = wave.open("output.wav", 'r')
         self.sig = np.frombuffer(self.f.readframes(self.sample_rate), dtype=np.int16)

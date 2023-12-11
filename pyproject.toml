@@ -1,0 +1,19 @@
+[project]
+name = "nathanael_logan_acoustics_project"
+version = "0.0.1"
+authors = [
+  { name="Nathanael Sargent", email="nsargent2483@floridapoly.edu" },
+  { name="Logan Hewitt", email="lhewitt4247@floridapoly.edu" }
+]
+description = "An interactive tool that allows users to import, clean, visualize, analyze, and model data using scientific calculations and data visualization tools."
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/loganmih/acoustics-project"
+Issues = "https://github.com/loganmih/acoustics-project/issues"
