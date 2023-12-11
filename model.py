@@ -7,6 +7,7 @@ from scipy.io import wavfile
 from scipy import signal
 from tkinter import filedialog as fd
 import wave
+import math
 
 
 class Model():
@@ -144,7 +145,8 @@ class Model():
         amplitudes = 10 * np.log10(self.spectrum[freq_index])
 
         self.amplitudes = amplitudes
-        print(amplitudes)
+
+
 
         max_amplitude_index = np.argmax(amplitudes)
 
@@ -158,9 +160,8 @@ class Model():
 
         bottom_RT20_amplitude, bottom_RT20_index = self.find_closest_amplitude(amplitudes, max_amplitude - 25, top_RT20_index + 1)
 
-        # print(top_RT20_amplitude)
-        # print(bottom_RT20_amplitude)
 
+        # Calculating the RT60 time using the RT20
         rt20 = self.times[bottom_RT20_index] - self.times[top_RT20_index]
 
         rt60 = rt20 * 3
@@ -185,13 +186,6 @@ class Model():
         data_dict["bottom_RT20_index"] = bottom_RT20_index
 
 
-        # plt.plot(self.times, amplitudes)
-        # plt.plot(self.times[max_amplitude_index], max_amplitude, "go")
-        # plt.plot(self.times[top_RT20_index], top_RT20_amplitude, "yo")
-        # plt.plot(self.times[bottom_RT20_index], bottom_RT20_amplitude, "ro")
-        # plt.show()
-
-
     def find_frequency_RT60s(self):
         LOW_TARGET_FREQ = 200
         MID_TARGET_FREQ = 1600
@@ -206,8 +200,6 @@ class Model():
         for f in self.frequency_data:
             self.find_RT60(f["target_freq"], f)
 
-        # print(self.frequency_data)
-
         self.avg_RT60 = sum(f["RT60"] for f in self.frequency_data) / len(self.frequency_data)
 
         print("The average RT60 is", self.avg_RT60, "seconds")
@@ -218,6 +210,5 @@ class Model():
 
 
     def plot_wave(self):
-
         self.f = wave.open("output.wav", 'r')
         self.sig = np.frombuffer(self.f.readframes(self.sample_rate), dtype=np.int16)

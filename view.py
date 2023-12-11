@@ -64,7 +64,7 @@ class MainView(ttk.Frame):
 
         self.plotrt60s()
 
-        self.newRTText = ttk.Label(self.newWindow, text="Difference for 0.5: " + self.getDifference(), font=self.helveticaLabel)
+        self.newRTText = ttk.Label(self.newWindow, text="Difference: " + self.getDifference(), font=self.helveticaLabel)
         self.newRTText.grid(column=1, row=0)
 
         self.combineButton = tk.Button(self.newWindow, text="Combine Plots", command=self.combinePlot, font=self.helveticaButton)
@@ -77,7 +77,7 @@ class MainView(ttk.Frame):
         #ensure the right file name is being used for the label
         self.fileName = self.filePath.split("/")[-1]
         self.fileLabel.config(text=self.fileName, justify=tk.RIGHT)
-        self.fileLengthLabel.config(text=self.controller.getWavLength() + " sec", justify=tk.RIGHT)
+        self.fileLengthLabel.config(text=self.controller.getWavLength() + "s", justify=tk.RIGHT)
 
         self.fileLabel.pack(side=tk.TOP)
         self.fileLengthLabel.pack(side=tk.RIGHT, expand=True, fill=tk.BOTH)
@@ -96,7 +96,7 @@ class MainView(ttk.Frame):
         self.highestResonanceLabel.config(text="Highest Resonance")
         self.rt60Label.config(text="Low, Med, High RT60")
         
-        self.highestResonanceValue.config(text=str(self.getResonantFreq()) + " hz")
+        self.highestResonanceValue.config(text=str(self.getResonantFreq()) + " Hz")
         self.rt60Value.config(text=str(self.getrt60s()))
 
         self.highestResonanceLabel.grid(row=3, column=0, sticky='n', pady=20)
@@ -144,7 +144,7 @@ class MainView(ttk.Frame):
         self.fileLengthLabel = ttk.Label(self.fileText, font=self.helveticaLabel)
 
         #button to show plots of rt60
-        self.amplitudeButton = tk.Button(parent, text="Plot Amplitude", font=self.helveticaButton, command=self.showAmplitude)
+        self.amplitudeButton = tk.Button(parent, text="Plot Average Amplitude", font=self.helveticaButton, command=self.showAmplitude)
         self.plotButton = tk.Button(parent, text="Plot RT60", font=self.helveticaButton, command=self.newRT60Window)
 
         #data about the audio file

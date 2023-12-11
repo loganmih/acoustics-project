@@ -19,10 +19,11 @@ class Controller():
     def showAmplitude(self):
         plt.plot(self.model.freqs, self.model.avg_amplidtude_per_freq)
         plt.xlim(0, 3000)
-        plt.tight_layout()
+        # plt.tight_layout()
 
-        plt.xlabel("frequency")
-        plt.ylabel("amplitude")
+        plt.title("Average Amplitude over Frequency")
+        plt.xlabel("Frequency (Hz)")
+        plt.ylabel("Amplitude")
 
         plt.show()
 
@@ -30,7 +31,7 @@ class Controller():
         return self.model.resonant_freq
     
     def getrt60s(self):
-        return [round(x["RT60"], 3) for x in self.model.frequency_data]
+        return ", ".join(map(lambda y: str(y) + "s", [(round(x["RT60"], 3)) for x in self.model.frequency_data]))
 
     def getDifference(self):
         return str(round(self.model.difference, 3))
@@ -60,16 +61,16 @@ class Controller():
             self.RT60plots[i].plot(self.model.times[x["max_amplitude_index"]], x["max_amplitude"], "go")
             self.RT60plots[i].plot(self.model.times[x["top_RT20_index"]], x["top_RT20_amplitude"], "yo")
             self.RT60plots[i].plot(self.model.times[x["bottom_RT20_index"]], x["bottom_RT20_amplitude"], "ro")
-            self.RT60plots[i].set_xlabel("time")
-            self.RT60plots[i].set_ylabel("amplitude")
+            self.RT60plots[i].set_xlabel("Time (seconds)")
+            self.RT60plots[i].set_ylabel("Amplitude (dB)")
 
         lowSubPlot.plot(self.model.times, self.model.frequency_data[0]["amplitudes"])
         lowSubPlot.plot(self.model.times, self.model.frequency_data[1]["amplitudes"])
         lowSubPlot.plot(self.model.times, self.model.frequency_data[2]["amplitudes"])
 
-        lowSubPlot.set_xlabel("time")
-        lowSubPlot.set_ylabel("amplitude")
-        lowSubPlot.legend(['low', 'med', 'high'])
+        lowSubPlot.set_xlabel("Time (seconds)")
+        lowSubPlot.set_ylabel("Amplitude (dB)")
+        lowSubPlot.legend(['Low', 'Med', 'High'])
 
     def getWavLength(self):
         return str(self.model.audio_duration)
@@ -85,7 +86,7 @@ class Controller():
         a.plot(self.model.sig)
 
         a.set_title("WAV Waveform")
-        a.set_xlabel("time")
-        a.set_ylabel("amplitude")
+        a.set_xlabel("Time (seconds)")
+        a.set_ylabel("Amplitude")
         
         self.view.plotWave(self.fig)

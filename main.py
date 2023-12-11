@@ -1,9 +1,10 @@
-from application import MainView
+from view import MainView
 from model import Model
 import tkinter as tk
 from controller import Controller
 
 root = tk.Tk()
+root.title("Nathanael Sargent and Logan Hewitt SPIDAM Project")
 
 view = MainView(root)
 model = Model()
