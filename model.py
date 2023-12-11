@@ -142,6 +142,8 @@ class Model():
 
         # Grabbing the amplitudes of the frequency over the time interval in decibels
         amplitudes = 10 * np.log10(self.spectrum[freq_index])
+
+        self.amplitudes = amplitudes
         print(amplitudes)
 
         max_amplitude_index = np.argmax(amplitudes)
