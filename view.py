@@ -73,6 +73,8 @@ class MainView(ttk.Frame):
     #code to run once a file has been uploaded
     def fileUploaded(self):
         self.panel.pack(side=tk.LEFT, padx=(0, 20))
+
+        self.uploadButton.destroy()
         
         #ensure the right file name is being used for the label
         self.fileName = self.filePath.split("/")[-1]
