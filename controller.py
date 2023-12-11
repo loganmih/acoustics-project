@@ -69,6 +69,7 @@ class Controller():
 
         lowSubPlot.set_xlabel("time")
         lowSubPlot.set_ylabel("amplitude")
+        lowSubPlot.legend(['low', 'med', 'high'])
 
     def getWavLength(self):
         return str(self.model.audio_duration)
