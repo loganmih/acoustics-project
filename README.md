@@ -5,8 +5,6 @@ This is an interactive tool that allows users to import, clean, visualize, analy
 Upload an audio file by clicking the "Select File" button (.mp3 or .wav accepted)
 Once an audio file is selected, it will be read and processed, and then information about the audio file will populate the screen.
 In addition to the information displayed there, you can click the "Plot Average Amplitude" and "Plot RT60" buttons to see additional graphs and audio info.
-=======
-
 
 
 
@@ -56,6 +54,3 @@ Start the application
 ## Screenshots
 
 ![App Screenshot](https://i.ibb.co/PjkDk76/Screenshot-2023-12-10-232416.png)
-
-
->>>>>>> main
